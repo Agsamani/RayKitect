@@ -1,0 +1,10 @@
+[submodule "RayKitect/vendor/GLFW"]
+	path = RayKitect/vendor/GLFW
+	url = https://github.com/glfw/glfw
+[submodule "RayKitect/vendor/glm"]
+	path = RayKitect/vendor/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "RauKitect/vendor/imgui"]
+	path = RayKitect/vendor/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking

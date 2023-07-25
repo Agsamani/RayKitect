@@ -40,10 +40,10 @@ project "RayKitect"
 
 	links
 	{
-		-- "GLFW",
-		-- "opengl32.lib",
-		-- "glad",
-		-- "imgui",
+		"GLFW",
+		"opengl32.lib",
+		"glad",
+		"imgui",
 	}
 
     filter "system:windows"

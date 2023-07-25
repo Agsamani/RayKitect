@@ -13,9 +13,9 @@ workspace "RayKitect"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dependencies"
-	--include "Arkitect/vendor/GLFW"
-	--include "Arkitect/vendor/glad"
-	--include "Arkitect/vendor/imgui"
+	include "RayKitect/vendor/GLFW"
+	include "RayKitect/vendor/glad"
+	include "RayKitect/vendor/imgui"
 group ""
 
 include "RayKitect"
