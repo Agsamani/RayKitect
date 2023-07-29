@@ -8,3 +8,6 @@
 	path = RayKitect/vendor/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "RayKitect/vendor/spdlog"]
+	path = RayKitect/vendor/spdlog
+	url = https://github.com/gabime/spdlog

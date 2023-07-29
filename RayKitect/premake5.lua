@@ -36,6 +36,7 @@ project "RayKitect"
         "%{IncludeDir.imgui}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
+        "%{IncludeDir.spdlog}",
 	}
 
 	links
