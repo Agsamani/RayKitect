@@ -10,7 +10,7 @@ int main(int argc, char** argv);
 
 struct ApplicationSpecification
 {
-	std::string Name = "Arkitect";
+	std::string Name = "RayKitect";
 	std::string WorkingDirectory;
 	uint32_t Width = 2048;
 	uint32_t Height = 1280;

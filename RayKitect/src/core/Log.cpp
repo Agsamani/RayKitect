@@ -12,7 +12,7 @@ void Log::Init()
 	auto sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	sink->set_pattern("%^[%T] %n: %v%$");
 
-	s_CoreLogger = std::make_shared<spdlog::logger>("ARKITECT", sink);
+	s_CoreLogger = std::make_shared<spdlog::logger>("RayKitect", sink);
 	spdlog::register_logger(s_CoreLogger);
 	s_CoreLogger->set_level(spdlog::level::trace);
 	s_CoreLogger->flush_on(spdlog::level::trace);

@@ -2,13 +2,14 @@
 
 #include "core/Base.h"
 #include "core/Application.h"
+#include "MainLayer.h"
 
 class RayKitectApp : public Application {
 public:
 	RayKitectApp(const ApplicationSpecification& spec)
 		:Application(spec)
 	{
-		
+		PushLayer(new MainLayer());
 	}
 
 	~RayKitectApp() {

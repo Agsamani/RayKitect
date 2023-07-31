@@ -1,6 +1,7 @@
 #pragma once
 
 #include <random>
+#include "glm/glm.hpp"
 
 class Time {
 public:
@@ -23,4 +24,8 @@ public:
 private:
 	static std::mt19937 s_RandomEngine;
 	static std::uniform_int_distribution<std::mt19937::result_type> s_Distribution;
+};
+
+namespace Utils {
+	uint32_t CastToRGBA(const glm::vec4& value);
 };
