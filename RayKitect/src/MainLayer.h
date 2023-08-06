@@ -3,6 +3,8 @@
 #include "renderer/Texture.h"
 #include "Renderer.h"
 
+#include <thread>
+
 class MainLayer : public Layer
 {
 public:
@@ -16,7 +18,10 @@ public:
 	void OnEvent(Event& e) override;
 
 private:
-	Renderer m_Renderer;
+	void OnAsyncRender();
 
+private:
+	Renderer m_Renderer;
+	std::thread th;
 };
 

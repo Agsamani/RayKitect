@@ -10,10 +10,11 @@ public:
 
 	void Render();
 
-	std::shared_ptr<Texture2D> GetFrameTexture() const { return m_FrameTexture; }
+	std::shared_ptr<Texture2D> GetFrameTexture() { SetTextureData(); return m_FrameTexture; }
 
 private:
 	glm::vec4 OnPixel(uint32_t x, uint32_t y);
+	void SetTextureData();
 
 private:
 	std::shared_ptr<Texture2D> m_FrameTexture;
