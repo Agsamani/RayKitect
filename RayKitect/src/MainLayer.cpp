@@ -11,6 +11,8 @@
 MainLayer::MainLayer()
 	: Layer("MainLayer"), m_Camera(45.0f, 0.01f, 100.0f)
 {
+	m_Scene.Spheres.push_back({ {0.0f, 0.0f, 0.0f}, 0.5, {0.35, 0.78, 0.95} });
+	m_Scene.Spheres.push_back({ {0.0f, 0.2f, 1.0f}, 0.8, {0.65, 0.88, 0.15} });
 
 }
 
@@ -33,7 +35,7 @@ void MainLayer::OnUpdate(float dt)
 {
 	RenderCommand::Clear();
 	m_Camera.OnUpdate(dt);
-	m_Renderer.Render(m_Camera);
+	m_Renderer.Render(m_Scene, m_Camera);
 }
 
 void MainLayer::OnImGuiUpdate()
@@ -66,5 +68,5 @@ void MainLayer::OnEvent(Event& e)
 
 void MainLayer::OnAsyncRender()
 {
-	m_Renderer.Render(m_Camera);
+	m_Renderer.Render(m_Scene, m_Camera);
 }

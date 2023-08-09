@@ -2,6 +2,8 @@
 #include "Renderer.h"
 #include "Utils.h"
 
+#include "Ray.h"
+
 void Renderer::Init(uint32_t width, uint32_t height)
 {
 	m_Width = width;
@@ -12,9 +14,10 @@ void Renderer::Init(uint32_t width, uint32_t height)
 	m_ImageData = new uint32_t[width * height];
 }
 
-void Renderer::Render(const Camera& camera)
+void Renderer::Render(const Scene& scene, const Camera& camera)
 {
-	m_SceneCamera = &camera;
+	m_ActiveCamera = &camera;
+	m_ActiveScene = &scene;
 
 	memset(m_ImageData, 0, m_Width * m_Height);
 
@@ -30,33 +33,48 @@ void Renderer::Render(const Camera& camera)
 
 glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 {
+	Ray ray;
+	ray.Origin = m_ActiveCamera->GetPosition();
+	ray.Direction = m_ActiveCamera->GetRayDirection(x, y);
 
-	glm::vec3 cameraPos = m_SceneCamera->GetPosition();
-	glm::vec3 spherePos = glm::vec3(0.0, 0.0, 0.0);
-	float r = 0.6;
+	int closestHitSphere = -1;
+	float hitDistance = std::numeric_limits<float>::max();
 
-	glm::vec3 ray = m_SceneCamera->GetRayDirection(x, y);
+	for (size_t i = 0; i < m_ActiveScene->Spheres.size(); i++) {
+		const Sphere& sphere = m_ActiveScene->Spheres[i];
+		glm::vec3 origin = ray.Origin - sphere.Position;
 
-	float a = glm::dot(ray, ray);
-	float b = 2.0 * glm::dot(ray, cameraPos);
-	float c = glm::dot(cameraPos, cameraPos) - r * r;
+		float a = glm::dot(ray.Direction, ray.Direction);
+		float b = 2.0 * glm::dot(ray.Direction, origin);
+		float c = glm::dot(origin, origin) - sphere.Radius * sphere.Radius;
 
-	float delta = b * b - 4 * a * c;
+		float delta = b * b - 4 * a * c;
 
-	float t1 = (- b - glm::sqrt(delta)) / (2.0 * a);
+		if (delta < 0.0f) {
+			continue;
+		}
 
-	glm::vec3 intersection1 = (t1) * ray + cameraPos;
+		float t1 = (-b - glm::sqrt(delta)) / (2.0 * a);
 
-	glm::vec3 normal = glm::normalize(intersection1 - spherePos);
+		if (t1 < hitDistance) {
+			hitDistance = t1;
+			closestHitSphere = (int)i;
+		}
+	}
+
+	if (closestHitSphere < 0) {
+		return glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
+	glm::vec3 origin = ray.Origin - m_ActiveScene->Spheres[closestHitSphere].Position;
+	glm::vec3 intersection = (hitDistance) * ray.Direction + origin;
+
+	glm::vec3 normal = glm::normalize(intersection);
 	glm::vec3 lightDir = glm::vec3(1.0, 2.0, 3.0);
 
-	if (delta >= 0) {
-		return glm::vec4(0.35 , 0.78, 0.95, 1.0) * glm::max(0.0f, glm::dot(-normalize(lightDir), normal));
-	}
-	else {
-		return glm::vec4(0.0f);//glm::vec4((x + y * m_FrameTexture->GetWidth()) / 640000.0, 0.68, 0.75, 1.0);
-	}
-
+	glm::vec4 result = glm::vec4(m_ActiveScene->Spheres[closestHitSphere].Color, 1.0) * glm::max(0.0f, glm::dot(normalize(lightDir), normal));
+	result.w = 1.0f;
+	return result;
 }
 
 void Renderer::SetTextureData()
