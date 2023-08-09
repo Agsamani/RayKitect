@@ -59,7 +59,7 @@ void Window::Init(int width, int height, std::string title)
 
 	// TODO : engine path
 	GLFWimage icon;
-	icon.pixels = stbi_load("../RayKitect/assets/icons/icon3.png", &icon.width, &icon.height, nullptr, 0);
+	icon.pixels = stbi_load("../RayKitect/assets/icons/icon2f.png", &icon.width, &icon.height, nullptr, 0);
 	glfwSetWindowIcon((GLFWwindow*)m_Window, 1, &icon);
 
 	glfwSetWindowSizeCallback((GLFWwindow*)m_Window, [](GLFWwindow* window, int width, int height)

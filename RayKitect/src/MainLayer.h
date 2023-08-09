@@ -26,6 +26,13 @@ private:
 	Renderer m_Renderer;
 	Camera m_Camera;
 	Scene m_Scene;
+
 	std::thread th;
+
+	// Temp
+	uint32_t m_Width = 160, m_Height = 100;
+
+	float m_MainRenderMultiplier = 10.0;
+	bool m_MainRender = false;
 };
 
