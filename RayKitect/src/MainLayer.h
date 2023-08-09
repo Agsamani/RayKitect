@@ -2,13 +2,14 @@
 #include "core/Layer.h"
 #include "renderer/Texture.h"
 #include "Renderer.h"
+#include "Camera.h"
 
 #include <thread>
 
 class MainLayer : public Layer
 {
 public:
-	MainLayer() : Layer("MainLayer") {};
+	MainLayer();
 	~MainLayer() = default;
 
 	void OnAttach() override;
@@ -22,6 +23,7 @@ private:
 
 private:
 	Renderer m_Renderer;
+	Camera m_Camera;
 	std::thread th;
 };
 

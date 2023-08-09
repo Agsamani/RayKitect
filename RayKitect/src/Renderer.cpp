@@ -12,13 +12,15 @@ void Renderer::Init(uint32_t width, uint32_t height)
 	m_ImageData = new uint32_t[width * height];
 }
 
-void Renderer::Render()
+void Renderer::Render(const Camera& camera)
 {
+	m_SceneCamera = &camera;
+
 	memset(m_ImageData, 0, m_Width * m_Height);
 
 	for (int x = 0; x < m_Width; x++) {
 		for (int y = 0; y < m_Height; y++) {
-			glm::vec4 value = glm::clamp(OnPixel(x, y), glm::vec4(0.0f), glm::vec4(1.0f));
+			glm::vec4 value = glm::clamp(PerPixel(x, y), glm::vec4(0.0f), glm::vec4(1.0f));
 			m_ImageData[x + y * m_Width] = Utils::CastToRGBA(value);
 		}
 	}
@@ -26,15 +28,14 @@ void Renderer::Render()
 	SetTextureData();
 }
 
-glm::vec4 Renderer::OnPixel(uint32_t x, uint32_t y)
+glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 {
-	glm::vec2 planeCoord = glm::vec2((float)x / m_Width, (float)y / m_Height) * 2.0f - glm::vec2(1.0, 1.0);
 
-	glm::vec3 cameraPos = glm::vec3(0.0, 0.0, -1.0);
+	glm::vec3 cameraPos = m_SceneCamera->GetPosition();
 	glm::vec3 spherePos = glm::vec3(0.0, 0.0, 0.0);
-	float r = 0.4;
+	float r = 0.6;
 
-	glm::vec3 ray = glm::normalize(glm::vec3(planeCoord,0.0) - cameraPos);
+	glm::vec3 ray = m_SceneCamera->GetRayDirection(x, y);
 
 	float a = glm::dot(ray, ray);
 	float b = 2.0 * glm::dot(ray, cameraPos);
@@ -47,10 +48,10 @@ glm::vec4 Renderer::OnPixel(uint32_t x, uint32_t y)
 	glm::vec3 intersection1 = (t1) * ray + cameraPos;
 
 	glm::vec3 normal = glm::normalize(intersection1 - spherePos);
-	glm::vec3 lightDir = glm::vec3(1.0, -2.0, 3.0);
+	glm::vec3 lightDir = glm::vec3(1.0, 2.0, 3.0);
 
 	if (delta >= 0) {
-		return glm::vec4(0.85 , 0.78, 0.25, 1.0) * glm::max(0.0f, glm::dot(-normalize(lightDir), normal));
+		return glm::vec4(0.35 , 0.78, 0.95, 1.0) * glm::max(0.0f, glm::dot(-normalize(lightDir), normal));
 	}
 	else {
 		return glm::vec4(0.0f);//glm::vec4((x + y * m_FrameTexture->GetWidth()) / 640000.0, 0.68, 0.75, 1.0);
