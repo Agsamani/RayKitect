@@ -2,6 +2,7 @@
 #include "renderer/Texture.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "Ray.h"
 
 #include "glm/glm.hpp"
 
@@ -17,9 +18,21 @@ public:
 	std::shared_ptr<Texture2D> GetFrameTexture() { SetTextureData(); return m_FrameTexture; }
 
 private:
-	glm::vec4 PerPixel(uint32_t x, uint32_t y);
-	void SetTextureData();
+	struct HitPayload {
+		float HitDistance;
+		glm::vec3 WorldPosition;
+		glm::vec3 WorldNormal;
 
+		uint32_t ObjectIndex;
+	};
+
+	glm::vec4 PerPixel(uint32_t x, uint32_t y);
+
+	HitPayload TraceRay(const Ray& ray);
+	HitPayload ClosestHit(const Ray& ray, float hitDistance, uint32_t objectIndex);
+	HitPayload Miss(const Ray& ray);
+
+	void SetTextureData();
 private:
 	std::shared_ptr<Texture2D> m_FrameTexture;
 

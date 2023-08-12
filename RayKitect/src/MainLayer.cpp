@@ -58,6 +58,9 @@ void MainLayer::OnImGuiUpdate()
 	ImGui::End();
 
 	ImGui::Begin("Scene");
+	if (ImGui::Button("Add sphere")) {
+		m_Scene.Spheres.push_back({ {0.0f, 0.0f, 0.0f}, 1.0, {1.0, 1.0, 1.0} });
+	}
 	for (size_t i = 0; i < m_Scene.Spheres.size(); i++) {
 		Sphere& sphere = m_Scene.Spheres[i];
 
@@ -67,6 +70,7 @@ void MainLayer::OnImGuiUpdate()
 		ImGui::DragFloat("Radius", &sphere.Radius, 0.1);
 		ImGui::ColorEdit3("Color", glm::value_ptr(sphere.Color));
 
+		ImGui::Separator();
 		ImGui::Separator();
 
 		ImGui::PopID();
