@@ -17,6 +17,8 @@ public:
 
 	std::shared_ptr<Texture2D> GetFrameTexture() { SetTextureData(); return m_FrameTexture; }
 
+	void ResetFrameIndex() { m_FrameIndex = 1; }
+
 private:
 	struct HitPayload {
 		float HitDistance;
@@ -39,8 +41,11 @@ private:
 	const Camera* m_ActiveCamera = nullptr;
 	const Scene* m_ActiveScene = nullptr;
 
-	uint32_t* m_ImageData;
 	uint32_t m_Width, m_Height;
 
+	uint32_t* m_ImageData;
+	glm::vec4* m_AccimulationData;
+
+	uint32_t m_FrameIndex = 1;
 };
 

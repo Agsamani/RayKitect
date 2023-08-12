@@ -10,6 +10,7 @@ void Renderer::Init(uint32_t width, uint32_t height)
 	m_FrameTexture = std::make_shared<Texture2D>(width, height);
 
 	m_ImageData = new uint32_t[width * height];
+	m_AccimulationData = new glm::vec4[width * height];
 }
 
 void Renderer::Render(const Scene& scene, const Camera& camera)
@@ -17,16 +18,24 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 	m_ActiveCamera = &camera;
 	m_ActiveScene = &scene;
 
-	//memset(m_ImageData, 0, m_Width * m_Height);
+	if (m_FrameIndex == 1) {
+		memset(m_AccimulationData, 0, m_Width * m_Height * sizeof(glm::vec4));
+	}
 
 	for (int x = 0; x < m_Width; x++) {
 		for (int y = 0; y < m_Height; y++) {
-			glm::vec4 value = glm::clamp(PerPixel(x, y), glm::vec4(0.0f), glm::vec4(1.0f));
+
+			m_AccimulationData[x + y * m_Width] += PerPixel(x, y);
+
+			glm::vec4 accimulatedColor = m_AccimulationData[x + y * m_Width] / (float)m_FrameIndex;
+
+			glm::vec4 value = glm::clamp(accimulatedColor, glm::vec4(0.0f), glm::vec4(1.0f));
 			m_ImageData[x + y * m_Width] = Utils::CastToRGBA(value);
 		}
 	}
 
 	SetTextureData();
+	m_FrameIndex++;
 }
 
 glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
@@ -43,16 +52,12 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 		Renderer::HitPayload payload = TraceRay(ray);
 
 		if (payload.HitDistance < 0.0) {
-// 			glm::vec3 skyColor = glm::vec3(0.91f, 0.72f, 0.83f);
-// 			light += skyColor * contribution;
+			glm::vec3 skyColor = glm::vec3(0.89);//glm::normalize(ray.Direction) / 2.0f + 0.5f;
+			light += skyColor * contribution;
 			break;
 		}
 
 		contribution *= m_ActiveScene->Spheres[payload.ObjectIndex].Color ;
-
-		if (payload.ObjectIndex == 0) {
-			light += m_ActiveScene->Spheres[payload.ObjectIndex].Color * 2.0f ;
-		}
 
 		ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
 		ray.Direction = glm::normalize(payload.WorldNormal + Random::InUnitSphere());
@@ -126,7 +131,13 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 {
 	m_Width = width;
 	m_Height = height;
+
 	delete m_ImageData;
 	m_ImageData = new uint32_t[width * height];
+
+	delete m_AccimulationData;
+	m_AccimulationData = new glm::vec4[width * height];
+
 	m_FrameTexture = std::make_shared<Texture2D>(width, height);
+	ResetFrameIndex();
 }

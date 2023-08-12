@@ -12,8 +12,8 @@
 MainLayer::MainLayer()
 	: Layer("MainLayer"), m_Camera(45.0f, 0.01f, 100.0f)
 {
-	m_Scene.Spheres.push_back({ {0.0f, 0.0f, 0.0f}, 0.5, {0.35, 0.78, 0.95} });
-	m_Scene.Spheres.push_back({ {0.0f, 0.2f, 1.0f}, 0.8, {0.65, 0.88, 0.15} });
+	m_Scene.Spheres.push_back({ {0.0f, 0.0f, 0.0f}, 1.0, {0.35, 0.78, 0.95} });
+	m_Scene.Spheres.push_back({ {0.0f, -101.0f, 1.0f}, 100.0, {0.65, 0.88, 0.15} });
 
 }
 
@@ -34,7 +34,9 @@ void MainLayer::OnUpdate(float dt)
 {
 	RenderCommand::Clear();
 	if (!m_MainRender) {
-		m_Camera.OnUpdate(dt);
+		if (m_Camera.OnUpdate(dt)) {
+			m_Renderer.ResetFrameIndex();
+		}
 		m_Renderer.Render(m_Scene, m_Camera);
 	}
 }
@@ -54,6 +56,9 @@ void MainLayer::OnImGuiUpdate()
 			this->OnAsyncRender();
 			});
 		th.detach();
+	}
+	if (ImGui::Button("Reset")) {
+		m_Renderer.ResetFrameIndex();
 	}
 	ImGui::End();
 
@@ -100,5 +105,9 @@ void MainLayer::OnEvent(Event& e)
 
 void MainLayer::OnAsyncRender()
 {
-	m_Renderer.Render(m_Scene, m_Camera);
+	int accimulationCount = 10;
+	for (int i = 0; i < accimulationCount; i++)
+	{
+		m_Renderer.Render(m_Scene, m_Camera);
+	}
 }

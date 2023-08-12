@@ -14,15 +14,16 @@ Camera::Camera(float verticalFOV, float nearClip, float farClip)
 	m_Position = glm::vec3(0, 0, 6);
 }
 
-void Camera::OnUpdate(float dt)
+bool Camera::OnUpdate(float dt)
 {
+	bool moved = false;
 	glm::vec2 cursorPos = Input::GetMousePosition();
 	glm::vec2 delta = (cursorPos - m_LastMousePosition) * 0.01f;
 	m_LastMousePosition = cursorPos;
 
 	if (!Input::IsMouseButtonPressed(Mouse::Secondary)) {
 		Input::SetCursorVisibility(true);
-		return;
+		return false;
 	}
 
 	Input::SetCursorVisibility(false);
@@ -33,28 +34,34 @@ void Camera::OnUpdate(float dt)
 	if (Input::IsKeyPressed(Key::W))
 	{
 		m_Position += m_ForwardDirection * m_CameraMovementSpeed * dt;
+		moved = true;
 	}
 	else if (Input::IsKeyPressed(Key::S))
 	{
 		m_Position -= m_ForwardDirection * m_CameraMovementSpeed * dt;
+		moved = true;
 	}
 
 	if (Input::IsKeyPressed(Key::A))
 	{
 		m_Position -= rightDirection * m_CameraMovementSpeed * dt;
+		moved = true;
 	}
 	else if (Input::IsKeyPressed(Key::D))
 	{
 		m_Position += rightDirection * m_CameraMovementSpeed * dt;
+		moved = true;
 	}
 
 	if (Input::IsKeyPressed(Key::Q))
 	{
 		m_Position -= upDirection * m_CameraMovementSpeed * dt;
+		moved = true;
 	}
 	else if (Input::IsKeyPressed(Key::E))
 	{
 		m_Position += upDirection * m_CameraMovementSpeed * dt;
+		moved = true;
 	}
 
 	if (delta.x != 0.0f || delta.y != 0.0f)
@@ -65,9 +72,11 @@ void Camera::OnUpdate(float dt)
 		glm::quat q = glm::normalize(glm::cross(glm::angleAxis(pitchDelta, rightDirection),
 			glm::angleAxis(yawDelta, glm::vec3(0.f, 1.0f, 0.0f))));
 		m_ForwardDirection = glm::rotate(q, m_ForwardDirection);
+		moved = true;
 	}
 
 	RecalculateView();
+	return moved;
 }
 
 void Camera::OnResize(uint32_t width, uint32_t height)
