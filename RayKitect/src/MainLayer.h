@@ -34,5 +34,8 @@ private:
 
 	float m_MainRenderMultiplier = 10.0;
 	bool m_MainRender = false;
+
+	int m_AccimulationRenderPassCount = 10;
+	int m_CurrentAccimulationRenderPass = 0;
 };
 

@@ -53,11 +53,15 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 
 		if (payload.HitDistance < 0.0) {
 			glm::vec3 skyColor = glm::vec3(0.89);//glm::normalize(ray.Direction) / 2.0f + 0.5f;
-			light += skyColor * contribution;
+			//light += skyColor * contribution;
 			break;
 		}
 
-		contribution *= m_ActiveScene->Spheres[payload.ObjectIndex].Color ;
+		const Sphere& selectedSphere = m_ActiveScene->Spheres[payload.ObjectIndex];
+		const Material& selectedMaterial = m_ActiveScene->Materials[selectedSphere.MaterialIndex];
+
+		contribution *= selectedMaterial.Color;
+		light += selectedMaterial.GetEmission();
 
 		ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
 		ray.Direction = glm::normalize(payload.WorldNormal + Random::InUnitSphere());

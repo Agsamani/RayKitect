@@ -12,9 +12,33 @@
 MainLayer::MainLayer()
 	: Layer("MainLayer"), m_Camera(45.0f, 0.01f, 100.0f)
 {
-	m_Scene.Spheres.push_back({ {0.0f, 0.0f, 0.0f}, 1.0, {0.35, 0.78, 0.95} });
-	m_Scene.Spheres.push_back({ {0.0f, -101.0f, 1.0f}, 100.0, {0.65, 0.88, 0.15} });
+	Material basicMaterial;
+	basicMaterial.Color = glm::vec3(1.0);
+	basicMaterial.EmissionColor = glm::vec3(1.0);
+	basicMaterial.EmissionPower = 0.0f;
+	m_Scene.Materials.push_back(basicMaterial);
 
+	{
+		Sphere sphere;
+		sphere.Position = glm::vec3(-1.0f, 0.0f, 0.0f);
+		sphere.Radius = 1.0f;
+		sphere.MaterialIndex = 0;
+		m_Scene.Spheres.push_back(sphere);
+	}
+	{
+		Sphere sphere;
+		sphere.Position = glm::vec3(0.0f, -101.0f, 0.0f);
+		sphere.Radius = 100.0f;
+		sphere.MaterialIndex = 0;
+		m_Scene.Spheres.push_back(sphere);
+	}
+	{
+		Sphere sphere;
+		sphere.Position = glm::vec3(1.0f, 0.0f, 0.0f);
+		sphere.Radius = 1.0f;
+		sphere.MaterialIndex = 0;
+		m_Scene.Spheres.push_back(sphere);
+	}
 }
 
 void MainLayer::OnAttach() 
@@ -60,11 +84,16 @@ void MainLayer::OnImGuiUpdate()
 	if (ImGui::Button("Reset")) {
 		m_Renderer.ResetFrameIndex();
 	}
+	ImGui::InputInt("Accimulation Count", &m_AccimulationRenderPassCount);
+	if (m_MainRender)
+	{
+		ImGui::Text((std::string("Current render pass: ") + std::to_string(m_CurrentAccimulationRenderPass)).c_str());
+	}
 	ImGui::End();
 
 	ImGui::Begin("Scene");
 	if (ImGui::Button("Add sphere")) {
-		m_Scene.Spheres.push_back({ {0.0f, 0.0f, 0.0f}, 1.0, {1.0, 1.0, 1.0} });
+		m_Scene.Spheres.push_back({ {0.0f, 0.0f, 0.0f}, 1.0, 0});
 	}
 	for (size_t i = 0; i < m_Scene.Spheres.size(); i++) {
 		Sphere& sphere = m_Scene.Spheres[i];
@@ -73,9 +102,25 @@ void MainLayer::OnImGuiUpdate()
 
 		ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1);
 		ImGui::DragFloat("Radius", &sphere.Radius, 0.1);
-		ImGui::ColorEdit3("Color", glm::value_ptr(sphere.Color));
+		ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0, m_Scene.Materials.size() - 1);
 
 		ImGui::Separator();
+
+		ImGui::PopID();
+	}
+
+	if (ImGui::Button("Add material")) {
+		m_Scene.Materials.push_back({ {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0} ,0.0 });
+	}
+	for (size_t i = 0; i < m_Scene.Materials.size(); i++) {
+		Material& material = m_Scene.Materials[i];
+
+		ImGui::PushID(i);
+
+		ImGui::ColorEdit3("Color", glm::value_ptr(material.Color));
+		ImGui::ColorEdit3("Emission Color", glm::value_ptr(material.EmissionColor));
+		ImGui::DragFloat("Emission Power", &material.EmissionPower, 0.1, 0.0, FLT_MAX);
+
 		ImGui::Separator();
 
 		ImGui::PopID();
@@ -105,9 +150,9 @@ void MainLayer::OnEvent(Event& e)
 
 void MainLayer::OnAsyncRender()
 {
-	int accimulationCount = 10;
-	for (int i = 0; i < accimulationCount; i++)
+	for (int i = 0; i < m_AccimulationRenderPassCount; i++)
 	{
+		m_CurrentAccimulationRenderPass = i + 1;
 		m_Renderer.Render(m_Scene, m_Camera);
 	}
 }
