@@ -108,6 +108,6 @@ glm::vec3 Camera::GetRayDirection(const uint32_t& x, const uint32_t& y) const
 	coord = coord * 2.0f - 1.0f;
 
 	glm::vec4 target = m_InverseProjection * glm::vec4(coord.x, coord.y, 1, 1);
-	glm::vec3 rayDirection = glm::vec3(m_InverseView * glm::vec4(glm::vec3(target) / target.w, 0));
+	glm::vec3 rayDirection = glm::vec3(m_InverseView * glm::vec4(glm::normalize(glm::vec3(target) / target.w), 0));
 	return rayDirection;
 }

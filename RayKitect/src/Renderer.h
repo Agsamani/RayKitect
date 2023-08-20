@@ -20,18 +20,21 @@ public:
 	void ResetFrameIndex() { m_FrameIndex = 1; }
 
 private:
-	struct HitPayload {
+	struct HitPayload { // SurfacrInteraction
 		float HitDistance;
 		glm::vec3 WorldPosition;
 		glm::vec3 WorldNormal;
 
 		uint32_t ObjectIndex;
+		bool isTriangle;
 	};
 
 	glm::vec4 PerPixel(uint32_t x, uint32_t y);
 
+	glm::vec3 RecTraceRay(const Ray& ray, int depth);
+
 	HitPayload TraceRay(const Ray& ray);
-	HitPayload ClosestHit(const Ray& ray, float hitDistance, uint32_t objectIndex);
+	HitPayload ClosestHit(const Ray& ray, float hitDistance, uint32_t objectIndex, bool isInside, bool isTriangle);
 	HitPayload Miss(const Ray& ray);
 
 	void SetTextureData();

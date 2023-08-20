@@ -8,23 +8,37 @@
 
 #include "imgui.h"
 
+#include "Utils.h"
 
 MainLayer::MainLayer()
 	: Layer("MainLayer"), m_Camera(45.0f, 0.01f, 100.0f)
 {
+	
 	Material basicMaterial;
 	basicMaterial.Color = glm::vec3(1.0);
 	basicMaterial.EmissionColor = glm::vec3(1.0);
 	basicMaterial.EmissionPower = 0.0f;
 	m_Scene.Materials.push_back(basicMaterial);
 
-	{
-		Sphere sphere;
-		sphere.Position = glm::vec3(-1.0f, 0.0f, 0.0f);
-		sphere.Radius = 1.0f;
-		sphere.MaterialIndex = 0;
-		m_Scene.Spheres.push_back(sphere);
-	}
+	Material emissiveMaterial;
+	emissiveMaterial.Color = glm::vec3(1.0);
+	emissiveMaterial.EmissionColor = glm::vec3(1.0);
+	emissiveMaterial.EmissionPower = 0.0f;
+	m_Scene.Materials.push_back(emissiveMaterial);
+
+	Material glass;
+	glass.Color = glm::vec3(1.0);
+	glass.EmissionColor = glm::vec3(1.0);
+	glass.EmissionPower = 0.0f;
+	m_Scene.Materials.push_back(glass);
+
+// 	{
+// 		Sphere sphere;
+// 		sphere.Position = glm::vec3(-1.0f, 0.0f, 0.0f);
+// 		sphere.Radius = 1.0f;
+// 		sphere.MaterialIndex = 0;
+// 		m_Scene.Spheres.push_back(sphere);
+// 	}
 	{
 		Sphere sphere;
 		sphere.Position = glm::vec3(0.0f, -101.0f, 0.0f);
@@ -32,13 +46,39 @@ MainLayer::MainLayer()
 		sphere.MaterialIndex = 0;
 		m_Scene.Spheres.push_back(sphere);
 	}
+// 	{
+// 		Sphere sphere;
+// 		sphere.Position = glm::vec3(1.0f, 0.0f, 0.0f);
+// 		sphere.Radius = 1.0f;
+// 		sphere.MaterialIndex = 0;
+// 		m_Scene.Spheres.push_back(sphere);
+// 	}
+
+	for (int i = 0; i < 1; i++)
 	{
 		Sphere sphere;
-		sphere.Position = glm::vec3(1.0f, 0.0f, 0.0f);
-		sphere.Radius = 1.0f;
+		float r = 3.0f;
+		float theta = 2 * 3.1415 * ((float)i / 11.0);
+
+		sphere.Position = glm::vec3(r * glm::cos(theta), -0.8f,r * glm::sin(theta));
+		sphere.Radius = 0.2f;
 		sphere.MaterialIndex = 0;
 		m_Scene.Spheres.push_back(sphere);
 	}
+//  	{
+// 		Sphere sphere;
+// 		sphere.Position = glm::vec3(0.0f, 0.0f, 0.0f);
+// 		sphere.Radius = 1.0f;
+// 		sphere.MaterialIndex = 1;
+// 		m_Scene.Spheres.push_back(sphere);
+// 	}
+
+	Triangle triangle;
+	triangle.Verticies[0] = glm::vec3(0.0f);
+	triangle.Verticies[1] = glm::vec3(0.0f, 0.0f, 1.0f);
+	triangle.Verticies[2] = glm::vec3(0.0f, 1.0f, 0.0f);
+	triangle.MaterialIndex = 1;
+	m_Scene.Triangles.push_back(triangle);
 }
 
 void MainLayer::OnAttach() 
@@ -108,6 +148,17 @@ void MainLayer::OnImGuiUpdate()
 
 		ImGui::PopID();
 	}
+	for (size_t i = 0; i < m_Scene.Triangles.size(); i++) {
+		Triangle& triangle = m_Scene.Triangles[i];
+
+		ImGui::PushID(100 * (i + 1));
+
+		ImGui::DragInt("Material", &triangle.MaterialIndex, 1.0f, 0, m_Scene.Materials.size() - 1);
+
+		ImGui::Separator();
+
+		ImGui::PopID();
+	}
 
 	if (ImGui::Button("Add material")) {
 		m_Scene.Materials.push_back({ {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0} ,0.0 });
@@ -120,6 +171,8 @@ void MainLayer::OnImGuiUpdate()
 		ImGui::ColorEdit3("Color", glm::value_ptr(material.Color));
 		ImGui::ColorEdit3("Emission Color", glm::value_ptr(material.EmissionColor));
 		ImGui::DragFloat("Emission Power", &material.EmissionPower, 0.1, 0.0, FLT_MAX);
+		ImGui::DragFloat("Smoothnes", &material.Smoothnes, 0.02, 0.0f, 1.0f);
+		ImGui::DragFloat("Specular", &material.Specular, 0.02, 0.0f, 1.0f);
 
 		ImGui::Separator();
 
