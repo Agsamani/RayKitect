@@ -9,6 +9,7 @@
 #include "imgui.h"
 
 #include "Utils.h"
+#include "MeshLoader.h"
 
 MainLayer::MainLayer()
 	: Layer("MainLayer"), m_Camera(45.0f, 0.01f, 100.0f)
@@ -73,12 +74,8 @@ MainLayer::MainLayer()
 // 		m_Scene.Spheres.push_back(sphere);
 // 	}
 
-	Triangle triangle;
-	triangle.Verticies[0] = glm::vec3(0.0f);
-	triangle.Verticies[1] = glm::vec3(0.0f, 0.0f, 1.0f);
-	triangle.Verticies[2] = glm::vec3(0.0f, 1.0f, 0.0f);
-	triangle.MaterialIndex = 1;
-	m_Scene.Triangles.push_back(triangle);
+	Mesh mesh("assets/meshes/ico.gltf");
+	m_Scene.Meshes.push_back(mesh);
 }
 
 void MainLayer::OnAttach() 
@@ -143,17 +140,6 @@ void MainLayer::OnImGuiUpdate()
 		ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1);
 		ImGui::DragFloat("Radius", &sphere.Radius, 0.1);
 		ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0, m_Scene.Materials.size() - 1);
-
-		ImGui::Separator();
-
-		ImGui::PopID();
-	}
-	for (size_t i = 0; i < m_Scene.Triangles.size(); i++) {
-		Triangle& triangle = m_Scene.Triangles[i];
-
-		ImGui::PushID(100 * (i + 1));
-
-		ImGui::DragInt("Material", &triangle.MaterialIndex, 1.0f, 0, m_Scene.Materials.size() - 1);
 
 		ImGui::Separator();
 

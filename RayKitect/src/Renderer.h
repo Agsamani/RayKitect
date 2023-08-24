@@ -34,7 +34,7 @@ private:
 	glm::vec3 RecTraceRay(const Ray& ray, int depth);
 
 	HitPayload TraceRay(const Ray& ray);
-	HitPayload ClosestHit(const Ray& ray, float hitDistance, uint32_t objectIndex, bool isInside, bool isTriangle);
+	HitPayload ClosestHit(const Ray& ray, float hitDistance, uint32_t objectIndex, bool isInside, bool isTriangle, size_t triangleIndex);
 	HitPayload Miss(const Ray& ray);
 
 	void SetTextureData();

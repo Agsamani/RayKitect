@@ -20,6 +20,8 @@ project "RayKitect"
 
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
+
+		"vendor/json/**.hpp"
 	}
 
     defines
@@ -37,6 +39,7 @@ project "RayKitect"
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.spdlog}",
+		"%{IncludeDir.json}",
 	}
 
 	links

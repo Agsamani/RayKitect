@@ -63,7 +63,7 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 			break;
 		}
 
-		int materialIndex = !payload.isTriangle ? m_ActiveScene->Spheres[payload.ObjectIndex].MaterialIndex : m_ActiveScene->Triangles[payload.ObjectIndex].MaterialIndex;
+		int materialIndex = !payload.isTriangle ? m_ActiveScene->Spheres[payload.ObjectIndex].MaterialIndex : m_ActiveScene->Meshes[payload.ObjectIndex].MaterialIndex;
 		const Material& selectedMaterial = m_ActiveScene->Materials[materialIndex];
 
 		glm::vec3 diffuseDir = glm::normalize(payload.WorldNormal + Random::InUnitSphere());
@@ -160,42 +160,50 @@ Renderer::HitPayload Renderer::TraceRay(const Ray& ray)
 		}
 	}
 
-	for (size_t i = 0; i < m_ActiveScene->Triangles.size(); i++) {
-		const Triangle& triangle = m_ActiveScene->Triangles[i];
+	size_t triangleIndex = 0;
 
-		const float EPSILON = 0.000001;
+	for (size_t i = 0; i < m_ActiveScene->Meshes.size(); i++) {
+		const Mesh& mesh = m_ActiveScene->Meshes[i];
+		size_t triangleCount = mesh.GetTriangleCount();
+		for (size_t j = 0; j < triangleCount; j++) {
+			Triangle triangle;
+			mesh.ConstructIthTriangle(j, triangle);
 
-		glm::vec3 edge1 = triangle.Verticies[1] - triangle.Verticies[0];
-		glm::vec3 edge2 = triangle.Verticies[2] - triangle.Verticies[0];
+			const float EPSILON = 0.000001;
 
-		glm::vec3 h = glm::cross(ray.Direction, edge2);
-		float a = glm::dot(edge1, h);
+			glm::vec3 edge1 = triangle.Verticies[1].Position - triangle.Verticies[0].Position;
+			glm::vec3 edge2 = triangle.Verticies[2].Position - triangle.Verticies[0].Position;
 
-		if (glm::abs(a) < EPSILON)
-			continue;
+			glm::vec3 h = glm::cross(ray.Direction, edge2);
+			float a = glm::dot(edge1, h);
 
-		float f = 1.0 / a;
-		glm::vec3 s = ray.Origin - triangle.Verticies[0];
-		float u = f * glm::dot(s, h);
+			if (glm::abs(a) < EPSILON)
+				continue;
 
-		if (u < 0.0f || u > 1.0f)
-			continue;
+			float f = 1.0 / a;
+			glm::vec3 s = ray.Origin - triangle.Verticies[0].Position;
+			float u = f * glm::dot(s, h);
 
-		glm::vec3 q = glm::cross(s, edge1);
-		float v = f * glm::dot(ray.Direction, q);
+			if (u < 0.0f || u > 1.0f)
+				continue;
 
-		if (v < 0.0f || u + v > 1.0f)
-			continue;
+			glm::vec3 q = glm::cross(s, edge1);
+			float v = f * glm::dot(ray.Direction, q);
 
-		float t = f * glm::dot(edge2, q);
+			if (v < 0.0f || u + v > 1.0f)
+				continue;
 
-		if (t < EPSILON)
-			continue;
+			float t = f * glm::dot(edge2, q);
 
-		if (t < hitDistance) {
-			hitDistance = t;
-			closestHit = (int)i;
-			isTriangle = true;
+			if (t < EPSILON)
+				continue;
+
+			if (t < hitDistance) {
+				hitDistance = t;
+				closestHit = (int)i;
+				triangleIndex = j;
+				isTriangle = true;
+			}
 		}
 	}
 
@@ -203,10 +211,10 @@ Renderer::HitPayload Renderer::TraceRay(const Ray& ray)
 		return Miss(ray);
 	}
 
-	return ClosestHit(ray, hitDistance, closestHit, isInside, isTriangle);
+	return ClosestHit(ray, hitDistance, closestHit, isInside, isTriangle, triangleIndex);
 }
 
-Renderer::HitPayload Renderer::ClosestHit(const Ray& ray, float hitDistance, uint32_t objectIndex, bool isInside, bool isTriangle)
+Renderer::HitPayload Renderer::ClosestHit(const Ray& ray, float hitDistance, uint32_t objectIndex, bool isInside, bool isTriangle, size_t triangleIndex)
 {
 	Renderer::HitPayload payload;
 	payload.HitDistance = hitDistance;
@@ -222,10 +230,11 @@ Renderer::HitPayload Renderer::ClosestHit(const Ray& ray, float hitDistance, uin
 		payload.WorldPosition += m_ActiveScene->Spheres[objectIndex].Position;
 	}
 	else {
-		const Triangle& triangle = m_ActiveScene->Triangles[objectIndex];
-		glm::vec3 edge1 = triangle.Verticies[1] - triangle.Verticies[0];
-		glm::vec3 edge2 = triangle.Verticies[2] - triangle.Verticies[0];
-		payload.WorldNormal = glm::normalize(glm::cross(edge2, edge1));
+		Triangle triangle;
+		m_ActiveScene->Meshes[objectIndex].ConstructIthTriangle(triangleIndex, triangle);
+		glm::vec3 edge1 = triangle.Verticies[1].Position - triangle.Verticies[0].Position;
+		glm::vec3 edge2 = triangle.Verticies[2].Position - triangle.Verticies[0].Position;
+		payload.WorldNormal = glm::normalize(glm::cross(edge1, edge2));
 		payload.WorldPosition = hitDistance * ray.Direction + ray.Origin;
 	}
 	
