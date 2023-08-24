@@ -14,6 +14,11 @@
 MainLayer::MainLayer()
 	: Layer("MainLayer"), m_Camera(45.0f, 0.01f, 100.0f)
 {
+
+	glm::vec3 v1(1.0f, 0.0f, -1.0f);
+	glm::vec3 v2(20.0f, -1.0f, 30.0f);
+	
+	glm::vec3 m = glm::min(v1, v2);
 	
 	Material basicMaterial;
 	basicMaterial.Color = glm::vec3(1.0);
@@ -140,6 +145,32 @@ void MainLayer::OnImGuiUpdate()
 		ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1);
 		ImGui::DragFloat("Radius", &sphere.Radius, 0.1);
 		ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0, m_Scene.Materials.size() - 1);
+
+		ImGui::Separator();
+
+		ImGui::PopID();
+	}
+
+	for (size_t i = 0; i < m_Scene.Meshes.size(); i++) {
+		Mesh& mesh = m_Scene.Meshes[i];
+
+		ImGui::PushID(100 + i);
+
+		glm::vec3 pos = mesh.GetTranslation();
+		ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.1);
+		if (pos != mesh.GetTranslation())
+			mesh.SetTranslation(pos); 
+
+
+		glm::vec3 rot = mesh.GetRotation();
+		ImGui::DragFloat3("Rotation", glm::value_ptr(rot), 0.1);
+		if (rot != mesh.GetRotation())
+			mesh.SetRotation(rot); 
+
+		glm::vec3 scl = mesh.GetScale();
+		ImGui::DragFloat3("Scale", glm::value_ptr(scl), 0.1);
+		if(scl != mesh.GetScale())
+			mesh.SetScale(scl); 
 
 		ImGui::Separator();
 

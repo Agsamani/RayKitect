@@ -57,6 +57,9 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 	for (int i = 0; i < bounces; i++) {
 		Renderer::HitPayload payload = TraceRay(ray);
 
+		if (payload.HitDistance == -10.0)
+			return glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+
 		if (payload.HitDistance < 0.0) {
 			glm::vec3 skyColor = glm::mix(glm::vec3(0.6f, 0.9f, 1.0f), glm::vec3(0.9f), ray.Direction.y);//glm::normalize(ray.Direction) / 2.0f + 0.5f;
 			light += skyColor * contribution;
@@ -164,10 +167,16 @@ Renderer::HitPayload Renderer::TraceRay(const Ray& ray)
 
 	for (size_t i = 0; i < m_ActiveScene->Meshes.size(); i++) {
 		const Mesh& mesh = m_ActiveScene->Meshes[i];
+		if (!CheckBoundHit(ray, mesh.GetBoundMin(), mesh.GetBoundMax()))
+			continue;
+			
+
 		size_t triangleCount = mesh.GetTriangleCount();
 		for (size_t j = 0; j < triangleCount; j++) {
 			Triangle triangle;
 			mesh.ConstructIthTriangle(j, triangle);
+			if (!CheckBoundHit(ray, triangle.BoundMin, triangle.BoundMax))
+				continue;
 
 			const float EPSILON = 0.000001;
 
@@ -247,6 +256,66 @@ Renderer::HitPayload Renderer::Miss(const Ray& ray)
 	Renderer::HitPayload payload;
 	payload.HitDistance = -1.0f;
 	return payload;
+}
+
+bool Renderer::CheckBoundHit(const Ray& ray, const glm::vec3& minB, const glm::vec3& maxB)
+{
+	if (ray.Direction.x == 0.0f) {
+		if (ray.Origin.x > maxB.x || ray.Origin.x < minB.x)
+			return false;
+	}
+
+	if (ray.Direction.y == 0.0f) {
+		if (ray.Origin.y > maxB.y || ray.Origin.y < minB.y)
+			return false;
+	}
+
+	if (ray.Direction.z == 0.0f) {
+		if (ray.Origin.z > maxB.z || ray.Origin.z < minB.z)
+			return false;
+	}
+	float minTX = (minB.x - ray.Origin.x) / ray.Direction.x;
+	float maxTX = (maxB.x - ray.Origin.x) / ray.Direction.x;
+	if (minTX > maxTX) {
+		float temp = minTX;
+		minTX = maxTX;
+		maxTX = temp;
+	}
+
+	if (maxTX < 0.0f) {
+		return false;
+	}
+
+	float minTY = (minB.y - ray.Origin.y) / ray.Direction.y;
+	float maxTY = (maxB.y - ray.Origin.y) / ray.Direction.y;
+	if (minTY > maxTY) {
+		float temp = minTY;
+		minTY = maxTY;
+		maxTY = temp;
+	}
+
+	if (maxTY < 0.0f) {
+		return false;
+	}
+
+	float minTZ = (minB.z - ray.Origin.z) / ray.Direction.z;
+	float maxTZ = (maxB.z - ray.Origin.z) / ray.Direction.z;
+	if (minTZ > maxTZ) {
+		float temp = minTZ;
+		minTZ = maxTZ;
+		maxTZ = temp;
+	}
+
+	if (maxTZ < 0.0f) {
+		return false;
+	}
+
+	float lower = glm::max(minTX, glm::max(minTY, minTZ));
+	float upper = glm::min(maxTX, glm::min(maxTY, maxTZ));
+
+	if (upper > lower)
+		return true;
+	return false;
 }
 
 void Renderer::SetTextureData()

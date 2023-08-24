@@ -30,13 +30,14 @@ static void LoadMesh(const std::string& path, Mesh* mesh) {
 	auto positionBufferView = data["bufferViews"][(int)data["accessors"][positionIndex]["bufferView"]];
 	auto indicesBufferView = data["bufferViews"][(int)data["accessors"][indicesIndex]["bufferView"]];
 
-	mesh->m_MeshData->IndexCount = (int)data["accessors"][indicesIndex]["count"];
-	size_t indexBufferSize = sizeof(uint16_t) * (int)data["accessors"][indicesIndex]["count"];
-	mesh->m_MeshData->IndexBuffer = new uint16_t[indexBufferSize];
+	mesh->m_MeshData->IndexCount = (size_t)data["accessors"][indicesIndex]["count"];
+	mesh->m_MeshData->IndexBuffer = new uint16_t[mesh->m_MeshData->IndexCount];
+	size_t indexBufferSize = sizeof(uint16_t) * mesh->m_MeshData->IndexCount;
 	memcpy(mesh->m_MeshData->IndexBuffer, buffer + (int)indicesBufferView["byteOffset"], indexBufferSize);
 
-	size_t vertexBufferSize = positionBufferView["byteLength"];
-	mesh->m_MeshData->VertexBuffer =new Vertex[vertexBufferSize];
+	mesh->m_MeshData->VertexCount = (size_t)data["accessors"][positionIndex]["count"];
+	mesh->m_MeshData->VertexBuffer =new Vertex[mesh->m_MeshData->VertexCount];
+	size_t vertexBufferSize = sizeof(Vertex::Position) * mesh->m_MeshData->VertexCount;
 	memcpy(mesh->m_MeshData->VertexBuffer, buffer + (int)positionBufferView["byteOffset"], vertexBufferSize);
 
 	bufferFile.close();

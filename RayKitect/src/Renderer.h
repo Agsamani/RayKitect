@@ -37,6 +37,8 @@ private:
 	HitPayload ClosestHit(const Ray& ray, float hitDistance, uint32_t objectIndex, bool isInside, bool isTriangle, size_t triangleIndex);
 	HitPayload Miss(const Ray& ray);
 
+	bool CheckBoundHit(const Ray& ray, const glm::vec3& minB, const glm::vec3& maxB);
+
 	void SetTextureData();
 private:
 	std::shared_ptr<Texture2D> m_FrameTexture;
